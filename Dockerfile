@@ -1,5 +1,5 @@
 # Use the official lightweight Python image.
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED True
@@ -9,9 +9,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libgl1-mesa-glx \
     libglib2.0-0
-
-# Install tesseract if you're using pytesseract
-# RUN apt-get install -y tesseract-ocr
 
 # Set the working directory to /app
 WORKDIR /app
@@ -27,4 +24,4 @@ COPY . .
 EXPOSE 8501
 
 # Command to run the app
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

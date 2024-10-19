@@ -1,0 +1,6 @@
+services:
+  locker-dashboard:
+    container_name: locker-dashboard
+    restart: unless-stopped
+    build:
+        context: ./
