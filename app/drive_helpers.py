@@ -1,4 +1,3 @@
-import os
 import io
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -83,19 +82,3 @@ def download_file(file_id, destination_path):
         status, done = downloader.next_chunk()
         print(f"Download {int(status.progress() * 100)}%.")
 
-
-if __name__ == "__main__":
-    # print("Google Drive API functions loaded successfully.")
-    # Example usage:
-
-    # Create a new folder
-    # create_folder("MyNewFolder")
-
-    # List folders and files
-    list_folder("14ePzWcTGacmazpkvGyB6CfXVFQ9ZYrYI")
-
-    # Delete a file or folder by ID
-    # delete_files("your_file_or_folder_id")
-
-    # Download a file by its ID
-    # download_file("your_file_id", "destination_path/file_name.extension")
