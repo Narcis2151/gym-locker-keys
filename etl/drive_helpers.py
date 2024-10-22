@@ -35,12 +35,8 @@ def list_folder(parent_folder_id=None):
     items = results.get("files", [])
 
     if not items:
-        print("No folders or files found in Google Drive.")
         return []
     else:
-        print("Folders and files in Google Drive:")
-        for item in items:
-            print(f'{item["name"]} ({item["mimeType"]}) - ID: {item["id"]}')
         return items
 
 

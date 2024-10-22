@@ -29,6 +29,7 @@ print("Created dataset {}.{}".format(client.project, dataset.dataset_id))
 table_id = "{}.{}.image_classification".format(client.project, dataset.dataset_id)
 
 schema = [
+    bigquery.SchemaField("blob_name", "STRING", mode="REQUIRED"),
     bigquery.SchemaField("image_name", "STRING", mode="REQUIRED"),
     bigquery.SchemaField("locker_number", "INTEGER", mode="REQUIRED"),
     bigquery.SchemaField("date_created", "STRING", mode="REQUIRED"),

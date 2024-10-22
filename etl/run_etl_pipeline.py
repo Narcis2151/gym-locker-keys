@@ -26,15 +26,13 @@ vision_client = vision.ImageAnnotatorClient(credentials=credentials)
 
 # Get the created date of the last image in the dataset
 max_date_created = get_last_created_image(bq_client)
-# Define Bucharest timezone
-bucharest_tz = timezone(timedelta(hours=3))
 
 # Ensure max_date_created is timezone-aware
-if max_date_created.tzinfo is None:
-    max_date_created = max_date_created.replace(tzinfo=bucharest_tz)
+if max_date_created is not None:
+    max_date_created = max_date_created.replace(tzinfo=timezone.utc)
     max_date_created = max_date_created.astimezone(timezone.utc)
 
-print(f"Last image created on: {max_date_created}")
+print(f"Last image in database created on: {max_date_created}")
 
 # Get the list of folders in Google Drive
 drive_folders = list_folder()
@@ -59,12 +57,11 @@ print("Number of photos in the folder:", len(gym_locker_keys_photos))
 for photo in gym_locker_keys_photos:
     # Replace 'Z' with '+00:00' to make it ISO 8601 compliant
     photo["createdTime"] = photo["createdTime"].replace("Z", "+00:00")
-
     # Parse as timezone-aware datetime in UTC
     photo["createdTime"] = datetime.fromisoformat(photo["createdTime"])
 
-    # Verify the parsed time
-    print("Photo's Created Time (UTC):", photo["createdTime"])
+print("Last image on drive created on ", gym_locker_keys_photos[0]["createdTime"])
+
 
 # Filter the list of folders and files to only include those created after the last image in the dataset
 if max_date_created is not None:
@@ -91,25 +88,28 @@ bucket_name = "gym-locker-keys_images"
 # Get the bucket
 bucket = storage_client.get_bucket(bucket_name)
 
+blobs = []
 # Upload the new photos to the bucket
 for photo in new_gym_locker_keys_photos:
     photo_path = f"../images/{photo['name']}"
     blob = bucket.blob(f"unverified_images/{photo["name"]}")
     blob.upload_from_filename(photo_path)
+    blobs.append({"name": blob.name, "createdTime": photo["createdTime"].isoformat()})
 
 print(f"Uploaded {len(new_gym_locker_keys_photos)} photos to the bucket.")
 
 # Delete the photos from the local filesystem
-os.system("rm -rf ../images/*")
 os.system("rm -rf ../images")
 
-
 # Classify the new photos using the Vision API
-rows_to_insert = classify_images(vision_client, storage_client, bucket_name, images=new_gym_locker_keys_photos)
+rows_to_insert = classify_images(vision_client, bucket_name, blobs)
 print("Number of classified images:", len(rows_to_insert))
-print(rows_to_insert)
 
 # Insert the classified images into BigQuery
+if len(rows_to_insert) == 0:
+    print("No images to insert into BigQuery.")
+    exit()
+
 errors = bq_client.insert_rows_json(
     "gym-locker-keys.gym_locker_data.image_classification",
     rows_to_insert,
