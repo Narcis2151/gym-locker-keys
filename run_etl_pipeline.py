@@ -1,7 +1,6 @@
 from google.cloud import bigquery
 from google.cloud import storage
 from google.cloud import vision
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 from etl_functions import (
@@ -13,24 +12,11 @@ from etl_functions import (
     transfer_file,
 )
 
-# Define the path to the service account key file
-SERVICE_ACCOUNT_FILE = "/Users/narcisfanica/Side-Projects/Gym Locker Keys/gcp_key.json"
-
-# Authenticate using service account credentials
-credentials = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE,
-    scopes=["https://www.googleapis.com/auth/cloud-platform"],
-)
-
-drive_credentials = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE, scopes=["https://www.googleapis.com/auth/drive"]
-)
-
 # Initialize BigQuery and GCS clients
-bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
-storage_client = storage.Client(credentials=credentials, project=credentials.project_id)
-vision_client = vision.ImageAnnotatorClient(credentials=credentials)
-drive_service = build("drive", "v3", credentials=drive_credentials)
+bq_client = bigquery.Client()
+storage_client = storage.Client()
+vision_client = vision.ImageAnnotatorClient()
+drive_service = build("drive", "v3")
 
 # Get the created date of the last image in the dataset
 max_date_created = get_last_created_image(bq_client)
