@@ -12,20 +12,20 @@ credentials = service_account.Credentials.from_service_account_file(
 # Construct a BigQuery client object.
 client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
-# TODO(developer): Set dataset_id to the ID of the dataset to create.
+# Set dataset_id to the ID of the dataset to create.
 dataset_id = "{}.gym_locker_data".format(client.project)
 
 # Construct a full Dataset object to send to the API.
 dataset = bigquery.Dataset(dataset_id)
 
-# TODO(developer): Specify the geographic location where the dataset should reside.
+# Specify the geographic location where the dataset should reside.
 dataset.location = "EU"
 
 # Send the dataset to the API for creation, with an explicit timeout.
 dataset = client.create_dataset(dataset, timeout=30)  # Make an API request.
 print("Created dataset {}.{}".format(client.project, dataset.dataset_id))
 
-# TODO(developer): Set table_id to the ID of the table to create.
+# Set table_id to the ID of the table to create.
 table_id = "{}.{}.image_classification".format(client.project, dataset.dataset_id)
 
 schema = [
