@@ -115,7 +115,7 @@ def classify_images(vision_client, bucket_name, blobs):
                     "blob_name": blob["name"],
                     "image_name": f"unverified_{locker_number}",
                     "locker_number": locker_number,
-                    "date_created": str(blob["createdTime"]),
+                    "date_created": blob["createdTime"],
                     "is_verified": False,
                 }
             )
