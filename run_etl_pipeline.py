@@ -59,7 +59,7 @@ for photo in gym_locker_keys_photos:
     blob = transfer_file(
         drive_service, storage_client, photo["id"], bucket_name, photo["name"]
     )
-    blobs.append({"name": blob.name, "createdTime": photo["createdTime"].isoformat()})
+    blobs.append({"name": blob.name, "createdTime": photo["createdTime"]})
 
 print(f"Uploaded {len(gym_locker_keys_photos)} photos to the bucket.")
 
