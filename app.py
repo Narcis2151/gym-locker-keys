@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -16,10 +17,12 @@ def main(bq_client):
     images_data = fetch_data_from_bigquery(bq_client)
     heatmap_data = generate_heatmap(images_data)
     plt.figure(figsize=(12, 8))
-    sns.heatmap(heatmap_data, annot=True, cmap="YlOrRd")
+    annotations = np.arange(1, 163).reshape(18, 9)
+    sns.heatmap(heatmap_data, annot=annotations, cbar=True, fmt="d")
     plt.title("Locker Usage Heatmap")
     plt.xlabel("Locker Number")
-    plt.ylabel("Row")
+    plt.xticks([])
+    plt.yticks([])
     st.pyplot(plt)
 
 
