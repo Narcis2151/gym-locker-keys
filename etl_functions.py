@@ -89,7 +89,7 @@ def classify_images(vision_client, bucket_name, blobs):
     rows_to_insert = []
 
     for blob in blobs:
-        image_uri = f"gs://{bucket_name}/{blob['gym']}/{blob["name"]}"
+        image_uri = f"gs://{bucket_name}/{blob["name"]}"
         image = vision.Image(source=vision.ImageSource(gcs_image_uri=image_uri))
 
         # Perform text detection
