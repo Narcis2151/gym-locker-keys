@@ -7,9 +7,6 @@ from google.cloud import bigquery
 from fetch_data_from_bigquery import fetch_data_from_bigquery
 from generate_heatmap import generate_heatmap
 
-# Initialize BigQuery client
-bq_client = bigquery.Client()
-
 
 def main(bq_client):
     st.title("Gym Locker Assignment Analysis")
@@ -27,4 +24,5 @@ def main(bq_client):
 
 
 if __name__ == "__main__":
+    bq_client = bigquery.Client()
     main(bq_client)

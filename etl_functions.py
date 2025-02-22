@@ -51,20 +51,20 @@ def list_files_from_folder(drive_service, parent_folder_id=None, start_date=None
     return items
 
 
-def get_last_created_image(bq_client):
+def get_last_created_image(bq_client, gym_name):
     query = """
     SELECT max(datetime(timestamp(date_created))) as latest_date
     FROM `gym-locker-keys.gym_locker_data.image_classification`
+    WHERE gym = '{}'
     """
-    query_job = bq_client.query(query)
+    query_job = bq_client.query(query.format(gym_name))
     results = query_job.result()
     for row in results:
         return row.latest_date
-    return None  # If table is empty
-
+    return None
 
 def transfer_file(
-    drive_service, storage_client, file_id, bucket_name, destination_blob_name
+    drive_service, storage_client, file_id, bucket_name, destination_blob_name, gym
 ):
     # Download file from Google Drive to in-memory buffer
     request = drive_service.files().get_media(fileId=file_id)
@@ -73,25 +73,23 @@ def transfer_file(
     done = False
     while not done:
         status, done = downloader.next_chunk()
-        # print(f"Download {int(status.progress() * 100)}%.")
 
     # Reset buffer position to start
     fh.seek(0)
 
     # Upload the file to Cloud Storage
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(f"unverified_images/{destination_blob_name}")
+    blob = bucket.blob(f"{gym}/{destination_blob_name}")
     blob.upload_from_file(fh)
 
     print("File transferred to Cloud Storage.")
     return blob
 
-
 def classify_images(vision_client, bucket_name, blobs):
     rows_to_insert = []
 
     for blob in blobs:
-        image_uri = f"gs://{bucket_name}/{blob["name"]}"
+        image_uri = f"gs://{bucket_name}/{blob['gym']}/{blob["name"]}"
         image = vision.Image(source=vision.ImageSource(gcs_image_uri=image_uri))
 
         # Perform text detection
@@ -100,14 +98,22 @@ def classify_images(vision_client, bucket_name, blobs):
 
         # Extract locker number
         locker_number = None
-        for index, text in enumerate(texts):
-            if (
-                text.description.isdigit()
-                and len(text.description) == 3
-                and texts[index - 1].description == "#"
-            ):
-                locker_number = int(text.description)
-                break
+        if blob['gym'] == '700_fit':
+            for index, text in enumerate(texts):
+                if (
+                    text.description.isdigit()
+                    and len(text.description) == 3
+                    and texts[index - 1].description == "#"
+                ):
+                    locker_number = int(text.description)
+                    break
+        else:
+            for index, text in enumerate(texts):
+                if (
+                    text.description.isdigit()
+                ):
+                    locker_number = int(text.description)
+                    break
 
         if locker_number:
             rows_to_insert.append(
@@ -117,11 +123,11 @@ def classify_images(vision_client, bucket_name, blobs):
                     "locker_number": locker_number,
                     "date_created": blob["createdTime"],
                     "is_verified": False,
+                    "gym": blob['gym']
                 }
             )
 
     return rows_to_insert
-
 
 def insert_into_bigquery(bq_client, rows_to_insert):
     if len(rows_to_insert) == 0:
@@ -133,7 +139,7 @@ def insert_into_bigquery(bq_client, rows_to_insert):
         rows_to_insert,
     )
 
-    if errors == []:
+    if not errors:
         print("Rows successfully inserted into BigQuery.")
     else:
         print("Errors occurred while inserting rows into BigQuery.")

@@ -37,6 +37,7 @@ schema = [
         "is_verified", "BOOLEAN", mode="REQUIRED", default_value_expression=False
     ),
     bigquery.SchemaField("author_name", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("gym", "STRING", mode="NULLABLE"),
 ]
 
 table = bigquery.Table(table_id, schema=schema)

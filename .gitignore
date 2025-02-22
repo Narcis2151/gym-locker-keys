@@ -2,3 +2,5 @@ gcp_key.json
 myenv
 .vscode
 __pycache__
+venv
+.idea
