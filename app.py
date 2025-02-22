@@ -13,7 +13,7 @@ def main(bq_client):
     # Fetch data and generate heatmaps
     images_700_fit, images_sweat = fetch_data_from_bigquery(bq_client)
     heatmap_data_700_fit = generate_heatmap(images_700_fit)
-    heatmap_data_sweat = generate_heatmap(images_sweat, nr_lockers=160)
+    heatmap_data_sweat = generate_heatmap(images_sweat)
 
     tab1, tab2 = st.tabs(["700 Fit", "Sweat"])
 
@@ -28,9 +28,9 @@ def main(bq_client):
         st.pyplot(plt)
 
     with tab2:
-        annotations2 = np.arange(1, 161).reshape(16, 10)
+        annotations = np.arange(1, 163).reshape(18, 9)
         plt.figure(figsize=(12, 8))
-        sns.heatmap(heatmap_data_sweat, annot=annotations2, cbar=True, fmt="d")
+        sns.heatmap(heatmap_data_sweat, annot=annotations, cbar=True, fmt="d")
         plt.title("Locker Usage Heatmap (Sweat)")
         plt.xlabel("Locker Number")
         plt.xticks([])
